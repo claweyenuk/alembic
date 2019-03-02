@@ -198,6 +198,26 @@ class RevisionPathTest(MigrationTest):
             self.b.revision,
         )
 
+    def test_invalid_short_input_does_not_match(self):
+
+        assert_raises_message(
+            util.CommandError,
+            r"Can't locate revision identified "
+            r"by '%s'" % self.b.revision[0:2],
+            self.env._downgrade_revs,
+            self.b.revision[0:2],
+            self.c.revision,
+        )
+
+        assert_raises_message(
+            util.CommandError,
+            r"Can't locate revision identified "
+            r"by '%s'" % self.c.revision[0:2],
+            self.env._upgrade_revs,
+            self.c.revision[0:2],
+            self.b.revision,
+        )
+
     def test_stamp_to_base(self):
         revs = self.env._stamp_revs("base", self.d.revision)
         eq_(len(revs), 1)

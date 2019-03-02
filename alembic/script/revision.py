@@ -9,6 +9,11 @@ from ..util import compat
 _relative_destination = re.compile(r"(?:(.+?)@)?(\w+)?((?:\+|-)\d+)")
 _revision_illegal_chars = ["@", "-", "+"]
 
+# Minimum length required to match an input string to a revision. This
+# forces the user to input at least a few characters in order to match
+# up to a revision
+MIN_INPUT_REV_LENGTH = 3
+
 
 class RevisionError(Exception):
     pass
@@ -373,11 +378,14 @@ class RevisionMap(object):
             revision = False
         if revision is False:
             # do a partial lookup
-            revs = [
-                x
-                for x in self._revision_map
-                if x and x.startswith(resolved_id)
-            ]
+            if len(resolved_id) >= MIN_INPUT_REV_LENGTH:
+                revs = [
+                    x
+                    for x in self._revision_map
+                    if x and x.startswith(resolved_id)
+                ]
+            else:
+                revs = []
             if branch_rev:
                 revs = self.filter_for_lineage(revs, check_branch)
             if not revs:
